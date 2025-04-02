@@ -10,7 +10,7 @@ services:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
     networks:
-      - local
+      - infrastructure_network
   portainer:
     image: portainer/portainer-ce:lts
     container_name: portainer
@@ -18,8 +18,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./portainer_data:/data
     networks:
-      - local
+      - infrastructure_network
 
 
 networks:
-  local:
+   infrastructure_network:
+    external: true
