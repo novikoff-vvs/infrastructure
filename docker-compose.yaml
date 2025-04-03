@@ -1,3 +1,6 @@
+include:
+  - docker-compose.grafana.yaml
+
 services:
   app:
     image: 'docker.io/jc21/nginx-proxy-manager:latest'

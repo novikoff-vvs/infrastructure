@@ -1,0 +1,82 @@
+version: '3.7'
+
+services:
+  # Loki - Система для хранения логов
+  loki:
+    image: grafana/loki
+    container_name: loki
+#    ports:
+#      - "3100:3100"
+    volumes:
+      - ./.docker/loki/loki-config.yaml:/etc/loki/local-config.yaml
+    command:
+      - -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    networks:
+      - infrastructure_network
+
+  # Promtail - Агент для сбора логов с контейнеров и отправки их в Loki
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    volumes:
+      - ./.docker/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - ./src/services/bot/log:/var/log/bot_service
+      - ./src/services/user/log:/var/log/user_service
+    command:
+      - -config.file=/etc/promtail/promtail-config.yaml
+    restart: unless-stopped
+    networks:
+      - infrastructure_network
+
+  # Grafana - Для отображения логов из Loki
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Устанавливаем пароль администратора Grafana
+#    ports:
+#      - "3000:3000"
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - infrastructure_network
+    volumes:
+      - grafana-storage:/var/lib/grafana  # Мон
+
+  # KrakenD - API Gateway
+  krakend:
+    image: devopsfaith/krakend
+    container_name: krakend
+#    ports:
+#      - "8080:8080"  # Порт для KrakenD
+    volumes:
+      - ./.docker/krakend:/etc/krakend  # Папка с конфигурацией KrakenD
+      - ./logs/krakend:/var/log  # Папка для логов KrakenD
+      - ./.docker/krakend/krakend.conf:/etc/rsyslog.d/krakend.conf
+    environment:
+      - LOG_LEVEL=DEBUG  # Уровень логирования (можно DEBUG, INFO, ERROR и т.д.)
+    networks:
+      - infrastructure_network
+    restart: unless-stopped
+
+  pyroscope:
+    container_name: pyroscope
+    image: grafana/pyroscope:latest
+#    ports:
+#      - "4040:4040"
+    command:
+      - "server"
+    volumes:
+      - ./.docker/pyroscope/pyroscope.yml:/etc/pyroscope/server.yaml
+    networks:
+      - infrastructure_network
+
+volumes:
+  grafana-storage:
+    driver: local  #Используем локальное хранилище для данных
+
+networks:
+  infrastructure_network:
+    external: true

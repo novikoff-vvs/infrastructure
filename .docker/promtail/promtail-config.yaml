@@ -1,0 +1,26 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml  # Путь для хранения позиции логов
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push  # URL для отправки логов в Loki
+
+scrape_configs:
+  # Конфигурация для сбора логов KrakenD
+  - job_name: 'bot_service'
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: bot_service
+          __path__: /var/log/bot_service/*.log  # Указываем путь к логам KrakenD
+  - job_name: 'user_service'
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: user_service
+          __path__: /var/log/user_service/*.log  # Указываем путь к логам KrakenD

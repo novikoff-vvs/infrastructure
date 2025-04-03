@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "name": "krakend-api-gateway",
+  "port": 8080,
+  "extra_config": {
+    "telemetry/logging": {
+      "level": "DEBUG",
+      "syslog": true,
+      "stdout": false
+    }
+  },
+  "endpoints": [
+    {
+      "endpoint": "/loki/api/v1/push",
+      "method": "POST",
+      "backend": [
+        {
+          "url_pattern": "/loki/api/v1/push",
+          "host": [
+            "http://loki:3100"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/pyroscope",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/",
+          "host": [
+            "http://pyroscope:4040"
+          ]
+        }
+      ]
+    }
+  ]
+}
