@@ -20,6 +20,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./portainer_data:/data
+      - ./ssh_keys:./ssh_keys
+      - ./authorized_keys:./authorized_keys
     networks:
       - infrastructure_network
 
